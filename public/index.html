@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SWE Job Market</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="page-head">
+      <div>
+        <h1>Software Engineer Job Market</h1>
+        <p class="sub">US software engineering jobs, salary and experience</p>
+      </div>
+      <div class="head-actions">
+        <div class="head-row">
+          <label class="fetch-picker">Saved jobs
+            <select id="fetch-select" aria-label="Saved jobs to show"><option>Loading…</option></select>
+          </label>
+          <button id="refresh" type="button">Fetch source</button>
+        </div>
+        <div id="refresh-status" class="refresh-status" role="status" aria-live="polite"></div>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Job market views">
+      <button id="tab-dashboard" type="button" role="tab" aria-selected="true" aria-controls="panel-dashboard">Dashboard</button>
+      <button id="tab-sources" type="button" role="tab" aria-selected="false" aria-controls="panel-sources" tabindex="-1">Scraping sources</button>
+    </nav>
+
+    <div id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
+    <section id="empty-dashboard" class="card empty-dashboard" hidden>
+      <div><h2>Start with US software engineering jobs</h2><p>Add sources in Scraping sources, then fetch the latest jobs to populate this dashboard.</p></div>
+      <button id="empty-fetch" type="button">Fetch source</button>
+    </section>
+    <div id="fetch-note" class="fetch-note" role="status" hidden></div>
+    <section class="filters" aria-label="Filters">
+      <label>Company <select id="f-company"><option value="">All companies</option></select></label>
+      <label>Level <select id="f-level"><option value="">All levels</option></select></label>
+      <label>Location
+        <input id="f-location" type="search" list="f-location-options" placeholder="All locations" autocomplete="off" />
+        <datalist id="f-location-options"></datalist>
+      </label>
+      <label>Specialty <select id="f-specialty"><option value="">All specialties</option></select></label>
+      <label>Posted
+        <select id="f-days">
+          <option value="0">Any time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+      </label>
+      <button id="f-reset" class="ghost" type="button">Reset</button>
+    </section>
+
+    <section class="tiles">
+      <div class="tile"><div class="tile-label">Job posts</div><div class="tile-value" id="k-count">–</div></div>
+      <div class="tile"><div class="tile-label">Median salary (USD)</div><div class="tile-value" id="k-salary">–</div><div class="tile-note" id="k-salary-range"></div></div>
+      <div class="tile"><div class="tile-label">Median years of experience</div><div class="tile-value" id="k-years">–</div><div class="tile-note" id="k-years-range"></div></div>
+    </section>
+
+    <section class="grid">
+      <figure class="card">
+        <figcaption><h2>Job posts by years of experience required</h2></figcaption>
+        <div class="chart" id="chart-years"></div>
+      </figure>
+      <figure class="card">
+        <figcaption>
+          <h2>Salary by years of experience</h2>
+          <div class="legend">
+            <span><i class="swatch line"></i>Median</span>
+            <span><i class="swatch band"></i>25th–75th percentile</span>
+          </div>
+        </figcaption>
+        <div class="chart" id="chart-salary"></div>
+      </figure>
+    </section>
+
+    <figure class="card">
+      <figcaption><h2>By location</h2></figcaption>
+      <div id="chart-location" class="loc-list"></div>
+    </figure>
+
+    <section class="card">
+      <div class="table-head">
+        <h2>Job posts</h2>
+        <div class="table-tools">
+          <label class="sort-picker">Sort by
+            <select id="sort">
+              <option value="postedDate:desc">Newest posted</option>
+              <option value="postedDate:asc">Oldest posted</option>
+              <option value="salaryMid:desc">Highest salary</option>
+              <option value="salaryMid:asc">Lowest salary</option>
+              <option value="yearsExperience:desc">Most years exp</option>
+              <option value="yearsExperience:asc">Fewest years exp</option>
+              <option value="custom" hidden></option>
+            </select>
+          </label>
+          <input id="search" type="search" aria-label="Search job posts" placeholder="Search title, company, or location…" />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="title" scope="col"><button type="button">Title</button></th>
+              <th data-sort="company" scope="col"><button type="button">Company</button></th>
+              <th data-sort="location" scope="col"><button type="button">Location</button></th>
+              <th data-sort="yearsExperience" class="num" scope="col"><button type="button">Years exp</button></th>
+              <th data-sort="salaryMid" class="num" scope="col"><button type="button">Salary</button></th>
+              <th data-sort="postedDate" class="num" scope="col"><button type="button">Posted</button></th>
+              <th>Job post</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="table-foot"><span id="row-info"></span><button id="more" class="ghost" type="button">Show more</button></div>
+    </section>
+
+    <footer class="page-foot" id="sources"></footer>
+    </div>
+
+    <div id="panel-sources" role="tabpanel" aria-labelledby="tab-sources" hidden>
+      <section class="card">
+        <div class="source-heading"><div><h2>Scraping sources</h2><p class="sub">Apple, NVIDIA, and Microsoft careers are supported. Fetch source refreshes every enabled link and combines software engineering jobs in one dashboard. NVIDIA and Microsoft jobs are limited to the United States.</p></div></div>
+        <div id="source-status" class="source-status" role="status" aria-live="polite"></div>
+        <div id="source-list" class="source-list"></div>
+      </section>
+      <section class="card">
+        <h2 id="source-form-heading">Add a career source</h2>
+        <form id="source-form" class="source-form">
+          <label>Name<input id="source-name" name="name" type="text" maxlength="100" placeholder="Microsoft Careers · US" required /></label>
+          <label>Career search URL<input id="source-url" name="url" type="url" placeholder="https://apply.careers.microsoft.com/careers" required aria-describedby="source-url-help" /></label>
+          <p class="form-help" id="source-url-help">Use jobs.apple.com/en-us/search, jobs.nvidia.com/careers, or apply.careers.microsoft.com/careers. Every fetch keeps only software engineering roles; NVIDIA and Microsoft always use US locations.</p>
+          <label class="check-label"><input id="source-enabled" name="enabled" type="checkbox" checked /> Enable this source for fetching</label>
+          <div class="form-actions"><button id="source-save" type="submit">Add source</button><button id="source-cancel" class="ghost" type="button" hidden>Cancel edit</button></div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <div id="tooltip" class="tooltip" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "faang-software-jobs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Apple, NVIDIA, and Microsoft software engineering jobs dashboard and source manager",
+  "type": "module",
+  "engines": { "node": ">=22.9.0" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env.local server.js",
+    "dev": "node --env-file-if-exists=.env.local --watch server.js",
+    "fetch": "node --env-file-if-exists=.env.local scripts/fetch-jobs.js",
+    "test": "node --test"
+  }
+}
